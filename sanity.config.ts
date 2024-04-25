@@ -8,14 +8,14 @@ export default defineConfig({
   name: 'default',
   title: 'Plain JS Presentation',
 
-  projectId: 'mh3x2u7s',
-  dataset: 'production',
+  projectId: 'ju3h49o8',
+  dataset: 'exo-rambutan',
 
   plugins: [
     structureTool(),
     visionTool(),
     presentationTool({
-      previewUrl: 'http://localhost:3000/html/index.html',
+      previewUrl: 'http://localhost:5500/html/index.html',
     }),
   ],
 

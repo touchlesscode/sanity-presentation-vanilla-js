@@ -2,7 +2,7 @@ import {defineField, defineType} from 'sanity'
 
 export const schemaTypes = [
   defineType({
-    name: 'page',
+    name: 'pageTest',
     type: 'document',
     fields: [
       defineField({

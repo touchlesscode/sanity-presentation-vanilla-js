@@ -18,12 +18,12 @@
     import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
 
     // GROQ query
-    const query = `*[_type=="page"][0]{title, body}`
+    const query = `*[_type=="pageTest"][0]{title, body}`
 
     // Initialize Sanity client for 'production' data
     const client = createClient({
-      projectId: 'mh3x2u7s',
-      dataset: 'production',
+      projectId: 'ju3h49o8',
+      dataset: 'exo-rambutan',
       apiVersion: '2024-04-24',
       useCdn: true, // queryStore.enableLiveMode disables this
     })
