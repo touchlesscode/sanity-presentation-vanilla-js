@@ -14,57 +14,49 @@
     import {createQueryStore} from 'https://esm.sh/@sanity/core-loader'
     import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
 
-    // Shared client configuration
-    const clientConfig = {
-      projectId: 'mh3x2u7s',
-      dataset: 'production',
-      apiVersion: '2024-04-24',
-    }
-
     // GROQ query
     const query = `*[_type=="page"][0]{title, body}`
 
+    // Initialize Sanity client
+    const client = createClient({
+      projectId: 'mh3x2u7s',
+      dataset: 'production',
+      apiVersion: '2024-04-24',
+    })
+
     // Non-presentation data fetching
-    const client = createClient(clientConfig)
     const initial = await client.fetch(query)
-    console.log('initial', initial)
 
     // Pass Sanity data to HTML
-    if (initial.title && initial.body) {
+    if (initial) {
       renderHtml(initial)
     }
 
     // Populate page with data
     function renderHtml({title, body}) {
-      if (title) {
-        document.querySelector('#title').innerHTML = title
-      }
-      if (body) {
-        document.querySelector('#body').innerHTML = body
-      }
+      document.querySelector('#title').innerHTML = title || ''
+      document.querySelector('#body').innerHTML = body || ''
     }
 
     // Initialize queryStore to initialize fetcherStore
-    // If using server rendering queryStore has `enableLiveMode`
     const queryStore = createQueryStore({
-      client: createClient({...clientConfig, perspective: 'previewDrafts', useCdn: false}),
+      client,
     })
-    console.log('queryStore', queryStore)
+
+    // I believe the client needs to get passed again because there's no serverClient
     queryStore.enableLiveMode({client})
+
+    // Allow the Studio to connect to overlays
     enableVisualEditing()
 
-    // Data fetch + events for Presentation
+    // Fetcherstore provides a subscribe method to listen for changes
     const fetcherStore = queryStore.createFetcherStore(query, {}, initial)
-    console.log('fetcherStore', fetcherStore)
 
+    // Listen for changes + re-render HTML in response
     fetcherStore.subscribe(({loading, data}) => {
-      console.log("I'm in the store")
-
       if (!loading && data) {
-        console.log('data', data)
         renderHtml(data)
       }
     })
-    console.log('query', queryStore)
   </script>
 </html>
