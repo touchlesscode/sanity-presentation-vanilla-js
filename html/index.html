@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1 id="title"></h1>
+    <p id="body"></p>
+  </body>
+  <script type="module">
+    import {createClient} from 'https://esm.sh/@sanity/client'
+    import {createQueryStore} from 'https://esm.sh/@sanity/core-loader'
+    import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
+
+    // Shared client configuration
+    const clientConfig = {
+      projectId: 'mh3x2u7s',
+      dataset: 'production',
+      apiVersion: '2024-04-24',
+    }
+
+    // GROQ query
+    const query = `*[_type=="page"][0]{title, body}`
+
+    // Non-presentation data fetching
+    const client = createClient(clientConfig)
+    const initial = await client.fetch(query)
+    console.log('initial', initial)
+
+    // Pass Sanity data to HTML
+    if (initial.title && initial.body) {
+      renderHtml(initial)
+    }
+
+    // Populate page with data
+    function renderHtml({title, body}) {
+      if (title) {
+        document.querySelector('#title').innerHTML = title
+      }
+      if (body) {
+        document.querySelector('#body').innerHTML = body
+      }
+    }
+
+    // Initialize queryStore to initialize fetcherStore
+    // If using server rendering queryStore has `enableLiveMode`
+    const queryStore = createQueryStore({
+      client: createClient({...clientConfig, perspective: 'previewDrafts', useCdn: false}),
+    })
+    console.log('queryStore', queryStore)
+    queryStore.enableLiveMode({client})
+    enableVisualEditing()
+
+    // Data fetch + events for Presentation
+    const fetcherStore = queryStore.createFetcherStore(query, {}, initial)
+    console.log('fetcherStore', fetcherStore)
+
+    fetcherStore.subscribe(({loading, data}) => {
+      console.log("I'm in the store")
+
+      if (!loading && data) {
+        console.log('data', data)
+        renderHtml(data)
+      }
+    })
+    console.log('query', queryStore)
+  </script>
+</html>
