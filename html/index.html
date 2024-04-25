@@ -17,49 +17,30 @@
     import {createQueryStore} from 'https://esm.sh/@sanity/core-loader'
     import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
 
-    // Shared config information for Sanity client
-    const baseClientConfig = {
-      projectId: 'mh3x2u7s',
-      dataset: 'production',
-      apiVersion: '2024-04-24',
-    }
-
     // GROQ query
     const query = `*[_type=="page"][0]{title, body}`
 
-    // Initialize Sanity client for 'production' data
-    const client = createClient(baseClientConfig)
-
-    // Non-presentation data fetching
-    const initial = await client.fetch(query)
-
-    // Pass Sanity data to HTML
-    if (initial) {
-      renderHtml(initial)
-    }
-
-    // Populate page with data
+    // Populate elements with data
     function renderHtml({title, body}) {
       document.querySelector('#title').innerHTML = title || '&nbsp;'
       document.querySelector('#body').innerHTML = body || '&nbsp'
     }
-    // TODO - Implement an on/off for presentation. In this example its always on.
-    // When in Presentation, enable Stega for overlays
-    client.config({stega: {enabled: true, studioUrl: 'http://localhost:3333'}})
+
+    // Initialize Sanity client for 'production' data
+    const client = createClient({
+      projectId: 'mh3x2u7s',
+      dataset: 'production',
+      apiVersion: '2024-04-24',
+      useCdn: true, // queryStore.enableLiveMode disables this
+    })
 
     // Initialize queryStore to access fetcherStore + enableLiveMode
     const queryStore = createQueryStore({
       client,
     })
 
-    // I believe the client needs to get passed again because there's no serverClient
-    queryStore.enableLiveMode({client})
-
-    // Allow the Studio to connect to overlays
-    enableVisualEditing()
-
     // Fetcherstore fetches data and provides a subscribe method to listen for changes
-    const fetcherStore = queryStore.createFetcherStore(query, {}, initial)
+    const fetcherStore = queryStore.createFetcherStore(query, {})
 
     // Listen for changes + re-render HTML in response
     fetcherStore.subscribe(({loading, data}) => {
@@ -67,5 +48,23 @@
         renderHtml(data)
       }
     })
+
+    // TODO call these conditionally based on env var, query param, etc
+    // Allow live updates as users type
+    queryStore.enableLiveMode({
+      client: client.config({
+        stega: {
+          enabled: true, // enable stega encoding for visual editing to pick up on
+          studioUrl: 'http://localhost:3333', // only show overlays when inside the Studio
+        },
+      }),
+    })
+
+    // Allow the Studio to connect to overlays
+    enableVisualEditing()
+
+    // This example is all client-side fetching + rendering, if you were server fetching you'd fetch via the client:
+    // const initial = client.fetch(query)
+    // And then pass 'intiial' as the 3rd argument of createFetcherStore. 'initial' is only required on the server.
   </script>
 </html>
