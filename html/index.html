@@ -20,12 +20,6 @@
     // GROQ query
     const query = `*[_type=="page"][0]{title, body}`
 
-    // Populate elements with data
-    function renderHtml({title, body}) {
-      document.querySelector('#title').innerHTML = title || '&nbsp;'
-      document.querySelector('#body').innerHTML = body || '&nbsp'
-    }
-
     // Initialize Sanity client for 'production' data
     const client = createClient({
       projectId: 'mh3x2u7s',
@@ -48,6 +42,12 @@
         renderHtml(data)
       }
     })
+
+    // Populate elements with data
+    function renderHtml({title, body}) {
+      document.querySelector('#title').innerHTML = title || '&nbsp;'
+      document.querySelector('#body').innerHTML = body || '&nbsp'
+    }
 
     // TODO call these conditionally based on env var, query param, etc
     // Allow live updates as users type
