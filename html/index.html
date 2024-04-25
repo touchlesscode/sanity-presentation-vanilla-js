@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
   </head>
-  <body>
+  <body style="font-family: sans-serif">
     <h1 id="title"></h1>
     <p id="body"></p>
   </body>
@@ -13,17 +13,20 @@
     import {createClient} from 'https://esm.sh/@sanity/client'
     import {createQueryStore} from 'https://esm.sh/@sanity/core-loader'
     import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
-
+    const baseClientConfig = {
+      projectId: 'mh3x2u7s',
+      dataset: 'production',
+      apiVersion: '2024-04-24',
+    }
     // GROQ query
     const query = `*[_type=="page"][0]{title, body}`
 
     // Initialize Sanity client
-    const client = createClient({
-      projectId: 'mh3x2u7s',
-      dataset: 'production',
-      apiVersion: '2024-04-24',
+    const client = createClient(baseClientConfig)
+    const stegaClient = createClient({
+      ...baseClientConfig,
+      stega: {enabled: true, studioUrl: 'http://localhost:3333'},
     })
-
     // Non-presentation data fetching
     const initial = await client.fetch(query)
 
@@ -34,17 +37,17 @@
 
     // Populate page with data
     function renderHtml({title, body}) {
-      document.querySelector('#title').innerHTML = title || ''
-      document.querySelector('#body').innerHTML = body || ''
+      document.querySelector('#title').innerHTML = title || '&nbsp;'
+      document.querySelector('#body').innerHTML = body || '&nbsp'
     }
 
     // Initialize queryStore to initialize fetcherStore
     const queryStore = createQueryStore({
-      client,
+      client: stegaClient,
     })
 
     // I believe the client needs to get passed again because there's no serverClient
-    queryStore.enableLiveMode({client})
+    queryStore.enableLiveMode({client: stegaClient})
 
     // Allow the Studio to connect to overlays
     enableVisualEditing()
