@@ -10,23 +10,26 @@
     <p id="body"></p>
   </body>
   <script type="module">
+    /**
+     * Vanilla JS implementation of Sanity's core-loader for Presentation.
+     */
     import {createClient} from 'https://esm.sh/@sanity/client'
     import {createQueryStore} from 'https://esm.sh/@sanity/core-loader'
     import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
+
+    // Shared config information for Sanity client
     const baseClientConfig = {
       projectId: 'mh3x2u7s',
       dataset: 'production',
       apiVersion: '2024-04-24',
     }
+
     // GROQ query
     const query = `*[_type=="page"][0]{title, body}`
 
-    // Initialize Sanity client
+    // Initialize Sanity client for 'production' data
     const client = createClient(baseClientConfig)
-    const stegaClient = createClient({
-      ...baseClientConfig,
-      stega: {enabled: true, studioUrl: 'http://localhost:3333'},
-    })
+
     // Non-presentation data fetching
     const initial = await client.fetch(query)
 
@@ -40,19 +43,22 @@
       document.querySelector('#title').innerHTML = title || '&nbsp;'
       document.querySelector('#body').innerHTML = body || '&nbsp'
     }
+    // TODO - Implement an on/off for presentation. In this example its always on.
+    // When in Presentation, enable Stega for overlays
+    client.config({stega: {enabled: true, studioUrl: 'http://localhost:3333'}})
 
-    // Initialize queryStore to initialize fetcherStore
+    // Initialize queryStore to access fetcherStore + enableLiveMode
     const queryStore = createQueryStore({
-      client: stegaClient,
+      client,
     })
 
     // I believe the client needs to get passed again because there's no serverClient
-    queryStore.enableLiveMode({client: stegaClient})
+    queryStore.enableLiveMode({client})
 
     // Allow the Studio to connect to overlays
     enableVisualEditing()
 
-    // Fetcherstore provides a subscribe method to listen for changes
+    // Fetcherstore fetches data and provides a subscribe method to listen for changes
     const fetcherStore = queryStore.createFetcherStore(query, {}, initial)
 
     // Listen for changes + re-render HTML in response
