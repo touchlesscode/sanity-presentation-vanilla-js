@@ -13,10 +13,9 @@
     /**
      * Vanilla JS implementation of Sanity's core-loader for Presentation.
      */
-    import {createClient} from 'https://esm.sh/@sanity/client'
-    import {createQueryStore} from 'https://esm.sh/@sanity/core-loader'
-    import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing'
-
+    import {createClient} from 'https://esm.sh/@sanity/client@6.15.20'
+    import {createQueryStore} from 'https://esm.sh/@sanity/core-loader@1.6.9'
+    import {enableVisualEditing} from 'https://esm.sh/@sanity/visual-editing@1.8.16'
     // GROQ query
     const query = `*[_type=="pageTest"][0]{title, body}`
 

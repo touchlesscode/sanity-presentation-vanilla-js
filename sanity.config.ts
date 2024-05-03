@@ -15,6 +15,7 @@ export default defineConfig({
     structureTool(),
     visionTool(),
     presentationTool({
+      // previewUrl: 'http://localhost:8787',
       previewUrl: 'http://localhost:5500/html/index.html',
     }),
   ],
